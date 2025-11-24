@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Summary - Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="summary-page">
+    <h2 class="page-title">Financial Summary</h2>
+    
+    <!-- Date Filter -->
+    <div class="filters-section">
+        <form method="GET" action="{{ url_for('summary') }}" class="filter-form">
+            <div class="filter-row">
+                <div class="form-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" 
+                           value="{{ filters.start_date }}" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" name="end_date" id="end_date" 
+                           value="{{ filters.end_date }}" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Apply Filter</button>
+                    <a href="{{ url_for('summary') }}" class="btn btn-secondary">Clear</a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="card">
+            <div class="card-header">
+                <h3>Total Income</h3>
+            </div>
+            <div class="card-body">
+                <p class="card-value income">₹{{ "{:,.2f}".format(summary.total_income) }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>Total Expenses</h3>
+            </div>
+            <div class="card-body">
+                <p class="card-value expense">₹{{ "{:,.2f}".format(summary.total_expenses) }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>Balance</h3>
+            </div>
+            <div class="card-body">
+                <p class="card-value {% if summary.balance >= 0 %}positive{% else %}negative{% endif %}">
+                    ₹{{ "{:,.2f}".format(summary.balance) }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>Transactions</h3>
+            </div>
+            <div class="card-body">
+                <p class="card-value">{{ summary.transaction_count }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Expense Breakdown -->
+
+    
+
+    {% if summary.expense_by_category %}
+    <div class="section">
+        <h3 class="section-title">Expenses by Category</h3>
+        <div class="category-breakdown">
+            {% for category, amount in summary.expense_by_category.items()|sort(attribute='1', reverse=True) %}
+            <div class="category-item">
+                <div class="category-info">
+                    <span class="category-name">{{ category }}</span>
+
+                    <span class="category-percentage">
+                        {{ "%.1f"|format((amount / summary.total_expenses * 100) if summary.total_expenses > 0 else 0) }}%
+                    </span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ (amount / summary.total_expenses * 100) if summary.total_expenses > 0 else 0 }}%"></div>
+                </div>
+                <div class="category-amount">₹{{ "{:,.2f}".format(amount) }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Income Breakdown -->
+    {% if summary.income_by_category %}
+    <div class="section">
+        <h3 class="section-title">Income by Category</h3>
+        <div class="category-breakdown">
+            {% for category, amount in summary.income_by_category.items()|sort(attribute='1', reverse=True) %}
+            <div class="category-item">
+                <div class="category-info">
+                    <span class="category-name">{{ category }}</span>
+                    <span class="category-percentage">
+                        {{ "%.1f"|format((amount / summary.total_income * 100) if summary.total_income > 0 else 0) }}%
+                    </span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill income" style="width: {{ (amount / summary.total_income * 100) if summary.total_income > 0 else 0 }}%"></div>
+                </div>
+                <div class="category-amount">₹{{ "{:,.2f}".format(amount) }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

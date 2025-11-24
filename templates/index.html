@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2 class="page-title">Dashboard</h2>
+    
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="card balance-card">
+            <div class="card-header">
+                <h3>Current Balance</h3>
+            </div>
+            <div class="card-body">
+                <p class="balance-amount {% if balance >= 0 %}positive{% else %}negative{% endif %}">
+                    ₹{{ "{:,.2f}".format(balance) }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="card income-card">
+            <div class="card-header">
+                <h3>Total Income</h3>
+            </div>
+            <div class="card-body">
+                <p class="card-value">₹{{ "{:,.2f}".format(summary.total_income) }}</p>
+            </div>
+        </div>
+        
+        <div class="card expense-card">
+            <div class="card-header">
+                <h3>Total Expenses</h3>
+            </div>
+            <div class="card-body">
+                <p class="card-value">₹{{ "{:,.2f}".format(summary.total_expenses) }}</p>
+            </div>
+        </div>
+        
+        <div class="card transaction-card">
+            <div class="card-header">
+                <h3>Transactions</h3>
+            </div>
+            <div class="card-body">
+                <p class="card-value">{{ summary.transaction_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+            ➕ Add Transaction
+        </a>
+        <a href="{{ url_for('transactions') }}" class="btn btn-secondary">
+            📋 View All Transactions
+        </a>
+        <a href="{{ url_for('summary') }}" class="btn btn-secondary">
+            📊 View Summary
+        </a>
+        <a href="{{ url_for('analytics') }}" class="btn btn-secondary">
+            📈 Analytics
+        </a>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="section">
+        <h3 class="section-title">Recent Transactions</h3>
+        {% if transactions %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.date }}</td>
+                        <td>
+                            <span class="badge badge-{{ transaction.type }}">
+                                {{ transaction.type.capitalize() }}
+                            </span>
+                        </td>
+                        <td>{{ transaction.category }}</td>
+                        <td class="amount {% if transaction.type == 'income' %}income{% else %}expense{% endif %}">
+                            {% if transaction.type == 'income' %}+{% else %}-{% endif %}
+                            ₹{{ "{:,.2f}".format(transaction.amount) }}
+                        </td>
+                        <td>{{ transaction.description }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No transactions yet. <a href="{{ url_for('add_transaction') }}">Add your first transaction</a>!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Category Breakdown -->
+    {% if top_expenses %}
+    <div class="section">
+        <h3 class="section-title">Top Expense Categories</h3>
+        <div class="category-list">
+            {% for category, amount in top_expenses %}
+            <div class="category-item">
+                <div class="category-name">{{ category }}</div>
+                <div class="category-amount">₹{{ "{:,.2f}".format(amount) }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

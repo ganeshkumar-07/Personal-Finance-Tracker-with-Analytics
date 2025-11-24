@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="analytics-page">
+    <h2 class="page-title">Analytics & Reports</h2>
+    
+    {% if report.error %}
+    <div class="empty-state">
+        <p>{{ report.error }}</p>
+    </div>
+    {% else %}
+    <!-- Report Summary -->
+    <div class="analytics-summary">
+        <div class="analytics-card">
+            <h3>Overview</h3>
+            <div class="analytics-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total Transactions</span>
+                    <span class="stat-value">{{ report.total_transactions }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Date Range</span>
+                    <span class="stat-value">{{ report.date_range.start }} to {{ report.date_range.end }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Balance</span>
+                    <span class="stat-value {% if report.balance >= 0 %}positive{% else %}negative{% endif %}">
+                        ₹{{ "{:,.2f}".format(report.balance) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="analytics-card">
+            <h3>Income Statistics</h3>
+            <div class="analytics-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total Income</span>
+                    <span class="stat-value">₹{{ "{:,.2f}".format(report.income.total) }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Average Income</span>
+                    <span class="stat-value">₹{{ "{:,.2f}".format(report.income.average) }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Income Transactions</span>
+                    <span class="stat-value">{{ report.income.count }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="analytics-card">
+            <h3>Expense Statistics</h3>
+            <div class="analytics-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total Expenses</span>
+                    <span class="stat-value">₹{{ "{:,.2f}".format(report.expenses.total) }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Average Expense</span>
+                    <span class="stat-value">₹{{ "{:,.2f}".format(report.expenses.average) }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Expense Transactions</span>
+                    <span class="stat-value">{{ report.expenses.count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if report.top_expense_categories %}
+    <div class="section">
+        <h3 class="section-title">Top 5 Expense Categories</h3>
+        <div class="top-categories">
+            {% for category, amount in report.top_expense_categories.items() %}
+            <div class="top-category-item">
+                <span class="category-rank">#{{ loop.index }}</span>
+                <span class="category-name">{{ category }}</span>
+                <span class="category-amount">₹{{ "{:,.2f}".format(amount) }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Charts Section -->
+    <div class="section">
+        <h3 class="section-title">Visualizations</h3>
+        {% if report.total_transactions > 0 %}
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h4>Expenses by Category</h4>
+                {% if report.expenses.count > 0 %}
+                <img src="{{ url_for('generate_chart', chart_type='expense_pie') }}" 
+                     alt="Expense Pie Chart" class="chart-image" 
+                     onerror="this.onerror=null; this.parentElement.innerHTML='<p style=\'text-align:center; color:#999; padding:2rem;\'>No expense data available</p>';">
+                {% else %}
+                <p style="text-align:center; color:#999; padding:2rem;">No expense data available</p>
+                {% endif %}
+            </div>
+            
+            <div class="chart-card">
+                <h4>Income vs Expenses</h4>
+                <img src="{{ url_for('generate_chart', chart_type='income_vs_expenses') }}" 
+                     alt="Income vs Expenses Chart" class="chart-image"
+                     onerror="this.onerror=null; this.parentElement.innerHTML='<p style=\'text-align:center; color:#999; padding:2rem;\'>Unable to load chart</p>';">
+            </div>
+            
+            <div class="chart-card full-width">
+                <h4>Spending Trend</h4>
+                {% if report.expenses.count > 0 %}
+                <img src="{{ url_for('generate_chart', chart_type='spending_trend') }}" 
+                     alt="Spending Trend Chart" class="chart-image"
+                     onerror="this.onerror=null; this.parentElement.innerHTML='<p style=\'text-align:center; color:#999; padding:2rem;\'>Unable to load chart</p>';">
+                {% else %}
+                <p style="text-align:center; color:#999; padding:2rem;">No expense data available</p>
+                {% endif %}
+            </div>
+            
+            <div class="chart-card full-width">
+                <h4>Category Comparison</h4>
+                {% if report.expenses.count > 0 %}
+                <img src="{{ url_for('generate_chart', chart_type='category_comparison') }}" 
+                     alt="Category Comparison Chart" class="chart-image"
+                     onerror="this.onerror=null; this.parentElement.innerHTML='<p style=\'text-align:center; color:#999; padding:2rem;\'>Unable to load chart</p>';">
+                {% else %}
+                <p style="text-align:center; color:#999; padding:2rem;">No expense data available</p>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No transactions available to generate charts. Add some transactions first!</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
