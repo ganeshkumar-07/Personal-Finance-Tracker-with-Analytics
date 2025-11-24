@@ -1,0 +1,4 @@
+id,date,type,category,amount,description
+1763832783934,2025-11-22,income,salary,100000.0,
+1763832824385,2025-11-22,expense,rent,50000.0,
+1763832961524,2025-11-22,expense,travel,8000.0,
